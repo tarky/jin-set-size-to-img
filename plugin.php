@@ -1,12 +1,12 @@
 <?php
 /*
-Plugin Name: Jin blog card by name
+Plugin Name: Jin prepare img lazyloading
 Author: webfood
 Plugin URI: http://webfood.info/
-Description: Jin blog card by name
+Description: Jin prepare img lazyloading
 Version: 0.1
 Author URI: http://webfood.info/
-Text Domain: Jin blog card by name
+Text Domain: Jin prepare img lazyloading
 Domain Path: /languages
 
 License:
@@ -30,44 +30,24 @@ License:
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-function to_blog_card($the_content) {
-	if ( is_singular() || is_category() || is_front_page() ) {
+function set_width_height( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
+  $img_attr = wp_get_attachment_image_src($post_thumbnail_id, $size);
+  $html = str_replace('<img', '<img width="'.$img_attr[1].'" height="'.$img_attr[2].'"', $html);
+  return $html;
+};
 
+add_filter( 'post_thumbnail_html', 'set_width_height', 99, 5 );
 
-  $res = preg_match_all("/\[card name=.*\]/" , $the_content, $m);
-		foreach ($m[0] as $match) {
-			$temp = '';
-      $temp = preg_replace("/^\[card name=/", "" , $match);
-			$temp = preg_replace("/\]$/", "" , $temp);
-			$temp = str_replace('"', '', $temp);
-			$url = '/'.$temp.'/';
-			$id = url_to_postid( $url );
-			if ( ! $id ) continue;//IDを取得できない場合はループを飛ばす
-				$post = get_post($id);
-				$title = $post->post_title;
-				if( ! get_post_meta($post->ID, 'post_desc',true) == null ){
-					$excerpt = get_post_meta($post->ID, 'post_desc',true);
-				}else{
-					$excerpt = cps_excerpt($post->post_content,68);
-				}
-				$logo = esc_url( get_site_icon_url( 32 ) ) ;
-				$sitetitle = get_bloginfo('name');
-				$thumbnail = get_the_post_thumbnail($id, 'cps_thumbnails', array('class' => 'blog-card-thumb-image'));
-				if ( !$thumbnail ) {
-					$thumbnail = '<img src="'.get_template_directory_uri().'/img/noimg320.png" />';
-				}
-
-			$tag = '<a href="'.$url.'" class="blog-card"><div class="blog-card-hl-box"><i class="jic jin-ifont-post"></i><span class="blog-card-hl"></span></div><div class="blog-card-box"><div class="blog-card-thumbnail">'.$thumbnail.'</div><div class="blog-card-content"><span class="blog-card-title">'.$title.'</span><span class="blog-card-excerpt">'.$excerpt.'...</span></div></div></a>';
-
-      $the_content = str_replace('<p>'.$match.'</p>', $tag , $the_content);
-
-		}
-	}
-	return $the_content;
+add_filter('the_content','prepare_lazyloading_to_balloon_icon');
+function prepare_lazyloading_to_balloon_icon($the_content){
+	return str_replace(
+		'<div class="balloon-icon "><img src',
+	  '<div class="balloon-icon "><img width="60" height="60" loading="lazy" src',
+		$the_content);
 }
 
-add_filter('the_content','to_blog_card');
-
-add_action('after_setup_theme',function(){
-  remove_filter('the_content','url_to_blog_card');
-});
+require_once 'custom_my_widget_profile.php';
+add_action( 'widgets_init', function() {
+	unregister_widget( 'My_Widget_Profile' );
+  register_widget( 'Custom_My_Widget_Profile' );
+}, 99);
