@@ -1,12 +1,12 @@
 <?php
 /*
-Plugin Name: Jin prepare img lazyloading
+Plugin Name: Jin set size to img
 Author: webfood
 Plugin URI: http://webfood.info/
-Description: Jin prepare img lazyloading
+Description: Jin set size to img
 Version: 0.1
 Author URI: http://webfood.info/
-Text Domain: Jin prepare img lazyloading
+Text Domain: Jin set size to img
 Domain Path: /languages
 
 License:
